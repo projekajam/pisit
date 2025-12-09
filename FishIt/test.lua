@@ -1,48 +1,75 @@
--- Fish It Auto Farm Script by [YourName]
+-- Fish It Script by projekajam (FIXED)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
--- Cari RemoteEvents (Sesuaikan path berdasarkan game)
-local remotes = ReplicatedStorage:WaitForChild("Remotes") -- Path umum Fish It
-local fishRemote = remotes:FindFirstChild("Fish") or remotes:FindFirstChild("Cast")
-local sellRemote = remotes:FindFirstChild("SellAll")
+print("🔍 Scanning Fish It remotes...")
 
--- Auto Fish Loop
-local autoFishing = false
-spawn(function()
-    while true do
-        if autoFishing then
-            if fishRemote then fishRemote:FireServer() end
-            wait(0.1)
+-- Cek semua possible paths
+local paths = {
+    ReplicatedStorage:FindFirstChild("Remotes"),
+    ReplicatedStorage:FindFirstChild("Events"),
+    ReplicatedStorage:FindFirstChild("RemoteEvents"),
+    workspace:FindFirstChild("Remotes")
+}
+
+local fishRemotes = {}
+for _, path in pairs(paths) do
+    if path then
+        for _, obj in pairs(path:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                local name = obj.Name:lower()
+                if name:find("fish") or name:find("cast") or name:find("catch") then
+                    table.insert(fishRemotes, obj)
+                    print("✅ Found remote:", obj:GetFullName())
+                end
+            end
         end
-        wait(0.5)
     end
+end
+
+print("📊 Found", #fishRemotes, "fish remotes")
+
+-- GUI Toggle
+local sg = Instance.new("ScreenGui")
+local f = Instance.new("Frame", sg)
+f.Size, f.Position, f.BackgroundColor3 = UDim2.new(0,220,0,100), UDim2.new(0,10,0,10), Color3.new(0,0,0)
+f.BorderSizePixel = 2
+sg.Parent = player:WaitForChild("PlayerGui")
+
+local title = Instance.new("TextLabel", f)
+title.Size, title.Position, title.Text, title.TextColor3 = UDim2.new(1,0,0,30), UDim2.new(0,0,0,0), "Fish It by projekajam", Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+
+local toggle = Instance.new("TextButton", f)
+toggle.Size, toggle.Position, toggle.Text, toggle.BackgroundColor3 = UDim2.new(1,-20,0,40), UDim2.new(0,10,0,40), "AUTO FARM: OFF", Color3.new(0.2,0.2,0.2)
+toggle.TextColor3, toggle.TextScaled = Color3.new(1,1,1), true
+
+local status = Instance.new("TextLabel", f)
+status.Size, status.Position, status.Text, status.TextColor3 = UDim2.new(1,0,0,25), UDim2.new(0,0,0,75), "Status: Ready", Color3.new(0,1,0)
+status.BackgroundTransparency, status.TextScaled = 1, true
+
+local autoFarm = false
+toggle.MouseButton1Click:Connect(function()
+    autoFarm = not autoFarm
+    toggle.Text = "AUTO FARM: " .. (autoFarm and "ON 🟢" or "OFF 🔴")
+    toggle.BackgroundColor3 = autoFarm and Color3.new(0,0.8,0) or Color3.new(0.8,0,0)
+    status.Text = autoFarm and "Farming..." or "Stopped"
 end)
 
--- Auto Sell
+-- Auto farm loop
 spawn(function()
-    while true do
-        if sellRemote then sellRemote:FireServer() end
-        wait(5)
+    while wait(0.05) do
+        if autoFarm and #fishRemotes > 0 then
+            for _, remote in pairs(fishRemotes) do
+                pcall(function()
+                    remote:FireServer()
+                end)
+            end
+        end
     end
 end)
 
--- Simple GUI Toggle
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0,200,0,100)
-Frame.Position = UDim2.new(0,10,0,10)
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
-
-local Toggle = Instance.new("TextButton")
-Toggle.Parent = Frame
-Toggle.Text = "Auto Farm: OFF"
-Toggle.Size = UDim2.new(1,0,0.5,0)
-Toggle.MouseButton1Click:Connect(function()
-    autoFishing = not autoFishing
-    Toggle.Text = autoFishing and "Auto Farm: ON" or "Auto Farm: OFF"
-end)
-
-print("Fish It Script Loaded! Toggle GUI di pojok kiri atas.")
+print("🎣 Fish It Script LOADED! Toggle di kiri atas")
+print("📋 Cek console untuk remote paths")
