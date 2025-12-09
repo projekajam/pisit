@@ -1,101 +1,157 @@
--- Fish It Circle Menu CLICKABLE by projekajam
+-- Fish It DRAGGABLE MENU by projekajam
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 
-print("🎣 Fish It Circle Menu LOADED!")
+print("🎣 Fish It DRAGGABLE LOADED!")
 
--- Main GUI
+-- ScreenGui
 local sg = Instance.new("ScreenGui")
 sg.Name = "FishItMenu"
+sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = player:WaitForChild("PlayerGui")
 
--- CIRCLE BUTTON (ImageButton = CLICKABLE)
+-- Circle Button (Draggable + Clickable)
 local circleBtn = Instance.new("ImageButton")
+circleBtn.Name = "CircleBtn"
 circleBtn.Parent = sg
-circleBtn.Size = UDim2.new(0, 80, 0, 80)
+circleBtn.Size = UDim2.new(0, 70, 0, 70)
 circleBtn.Position = UDim2.new(0, 20, 0, 20)
 circleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-circleBtn.BorderSizePixel = 0
-circleBtn.Image = "" -- Transparent image
+circleBtn.ZIndex = 10
+circleBtn.ImageTransparency = 1
 
 local circleCorner = Instance.new("UICorner")
-circleCorner.CornerRadius = UDim.new(1, 0)
+circleCorner.CornerRadius = UDim.new(0.5, 0)
 circleCorner.Parent = circleBtn
 
-local circleIcon = Instance.new("TextLabel")
-circleIcon.Parent = circleBtn
-circleIcon.Size = UDim2.new(1, 0, 1, 0)
-circleIcon.BackgroundTransparency = 1
-circleIcon.Text = "🎣"
-circleIcon.TextColor3 = Color3.new(1,1,1)
-circleIcon.TextScaled = true
-circleIcon.Font = Enum.Font.GothamBold
+local circleText = Instance.new("TextLabel")
+circleText.Parent = circleBtn
+circleText.Size = UDim2.new(1, 0, 1, 0)
+circleText.BackgroundTransparency = 1
+circleText.Text = "🎣"
+circleText.TextColor3 = Color3.new(1,1,1)
+circleText.TextScaled = true
+circleText.Font = Enum.Font.GothamBold
+circleText.ZIndex = 11
 
--- Menu Frame (Hidden)
+-- Main Menu (Draggable)
 local menu = Instance.new("Frame")
+menu.Name = "MainMenu"
 menu.Parent = sg
-menu.Size = UDim2.new(0, 250, 0, 300)
-menu.Position = UDim2.new(0, 120, 0, 20)
-menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-menu.BorderSizePixel = 0
+menu.Size = UDim2.new(0, 280, 0, 350)
+menu.Position = UDim2.new(0, 100, 0, 20)
+menu.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+menu.ZIndex = 5
 menu.Visible = false
 
 local menuCorner = Instance.new("UICorner")
-menuCorner.CornerRadius = UDim.new(0, 12)
+menuCorner.CornerRadius = UDim.new(0, 15)
 menuCorner.Parent = menu
 
--- Title
-local title = Instance.new("TextLabel")
-title.Parent = menu
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "Fish It by projekajam"
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.new(1,1,1)
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
+local menuStroke = Instance.new("UIStroke")
+menuStroke.Color = Color3.fromRGB(60, 60, 60)
+menuStroke.Thickness = 2
+menuStroke.Parent = menu
 
--- Buttons Data
-local buttons = {
-    {name="Auto Farm", color=Color3.fromRGB(0,200,0), active=false},
-    {name="Auto Sell", color=Color3.fromRGB(0,150,255), active=false},
-    {name="Speed x2", color=Color3.fromRGB(255,150,0), active=false},
-    {name="Fly", color=Color3.fromRGB(150,0,255), active=false}
-}
+-- Title Bar (Drag handle)
+local titleBar = Instance.new("Frame")
+titleBar.Parent = menu
+titleBar.Size = UDim2.new(1, 0, 0, 50)
+titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+titleBar.ZIndex = 6
 
--- Create Buttons
-for i, btnData in pairs(buttons) do
-    local btn = Instance.new("TextButton")
-    btn.Parent = menu
-    btn.Size = UDim2.new(0.9, 0, 0, 50)
-    btn.Position = UDim2.new(0.05, 0, 0, 50 + (i-1)*60)
-    btn.Text = btnData.name .. ": OFF"
-    btn.BackgroundColor3 = btnData.color
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.Gotham
-    btn.Name = btnData.name
-    
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
-    btnCorner.Parent = btn
-    
-    -- Button Logic
-    btn.MouseButton1Click:Connect(function()
-        btnData.active = not btnData.active
-        btn.Text = btnData.name .. ": " .. (btnData.active and "ON" or "OFF")
-        btn.BackgroundColor3 = btnData.active and Color3.fromRGB(0,255,0) or btnData.color
-        
-        if btnData.name == "Auto Farm" and btnData.active then
-            print("🚀 Auto Farm ON")
-        end
-    end)
+local titleText = Instance.new("TextLabel")
+titleText.Parent = titleBar
+titleText.Size = UDim2.new(1, -60, 1, 0)
+titleText.Position = UDim2.new(0, 15, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "Fish It by projekajam"
+titleText.TextColor3 = Color3.new(1,1,1)
+titleText.TextScaled = true
+titleText.Font = Enum.Font.GothamBold
+titleText.ZIndex = 7
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Parent = titleBar
+closeBtn.Size = UDim2.new(0, 40, 0, 40)
+closeBtn.Position = UDim2.new(1, -50, 0, 5)
+closeBtn.Text = "✕"
+closeBtn.BackgroundTransparency = 1
+closeBtn.TextColor3 = Color3.new(1,0.5,0.5)
+closeBtn.TextScaled = true
+closeBtn.ZIndex = 7
+
+-- DRAG FUNCTION
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    menu.Position = newPos
 end
 
--- CIRCLE BUTTON CLICK (Fixed!)
-circleBtn.MouseButton1Click:Connect(function()
-    menu.Visible = not menu.Visible
-    circleBtn.BackgroundColor3 = menu.Visible and Color3.fromRGB(50,255,50) or Color3.fromRGB(255,50,50)
-    print("📱 Menu toggled:", menu.Visible and "OPEN" or "CLOSED")
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = menu.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
 end)
 
-print("✅ Circle menu CLICKABLE! Klik tombol bulat 🎣")
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        updateInput(input)
+    end
+end)
+
+-- Toggle Menu
+circleBtn.MouseButton1Click:Connect(function()
+    menu.Visible = not menu.Visible
+    circleBtn.BackgroundColor3 = menu.Visible and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+    print("Menu toggled:", menu.Visible)
+end)
+
+-- Close Button
+closeBtn.MouseButton1Click:Connect(function()
+    menu.Visible = false
+    circleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+end)
+
+-- Test Button
+local testBtn = Instance.new("TextButton")
+testBtn.Parent = menu
+testBtn.Size = UDim2.new(0.9, 0, 0, 50)
+testBtn.Position = UDim2.new(0.05, 0, 0, 70)
+testBtn.Text = "TEST FARM (Spam All Remotes)"
+testBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+testBtn.TextColor3 = Color3.new(1,1,1)
+testBtn.TextScaled = true
+testBtn.Font = Enum.Font.GothamBold
+testBtn.ZIndex = 6
+
+local testCorner = Instance.new("UICorner")
+testCorner.CornerRadius = UDim.new(0, 10)
+testCorner.Parent = testBtn
+
+testBtn.MouseButton1Click:Connect(function()
+    print("🚀 SPAMMING ALL REMOTES...")
+    for i = 1, 10 do
+        for _, obj in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                pcall(function() obj:FireServer() end)
+            end
+        end
+        wait(0.1)
+    end
+    print("✅ Test complete!")
+end)
+
+print("✅ DRAGGABLE MENU LOADED! Drag title bar, klik circle 🎣")
